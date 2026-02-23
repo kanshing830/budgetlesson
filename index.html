@@ -59,7 +59,6 @@
         .pass-line { position: absolute; left: 80%; top: 0; width: 5px; height: 100%; background: #000; z-index: 5; }
         .pass-label { position: absolute; left: 80%; top: -22px; font-size: 0.8rem; font-weight: bold; transform: translateX(-50%); }
 
-        /* --- Refined Card Styling --- */
         .card-grid { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
@@ -69,7 +68,7 @@
         }
         
         .card { 
-            height: 320px; /* Taller height for card shape */
+            height: 320px; 
             width: 100%;
             perspective: 1000px; 
             cursor: pointer; 
@@ -104,16 +103,15 @@
             align-items: center;
             padding: 20px; 
             box-sizing: border-box; 
-            border: 6px solid white; /* Card border effect */
+            border: 6px solid white; 
             outline: 2px solid #333;
         }
 
         .card-front { 
-            font-size: 1.5rem; 
+            font-size: 1.4rem; 
             font-weight: bold; 
             text-align: center; 
             color: #2d3436; 
-            background-size: cover;
         }
 
         .card-back { 
@@ -123,7 +121,6 @@
             color: #636e72;
         }
 
-        /* --- UI Components --- */
         #modal-overlay {
             display: none; position: fixed; top:0; left:0; width:100%; height:100%;
             background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center;
@@ -195,19 +192,18 @@
     let satisfaction = 50;
     let round = 1;
 
-    // Policy Data
     const policies = {
         A: [
             { t: "🚭 調升煙草稅", m: 4, h: -8, rm: "稅收穩定增加。", rh: "吸煙人士生活開支受影響。" },
             { t: "🍭 徵收糖果稅", m: 3, h: -6, rm: "政府開拓細微稅源。", rh: "飲品加價引起小部分民怨。" },
             { t: "🚗 增加車牌登記費", m: 4, h: -6, rm: "增加國庫穩定收入。", rh: "準備買車的市民感到無奈。" },
-            { t: "🏥 微調急症室收費", m: 3, h: -7, rm: "稍微減輕醫療財政壓力。", rh: "基層市民看病負擔增加。" },
+            { t: "🏥 提升急症室收費", m: 3, h: -7, rm: "稍微減輕醫療財政壓力。", rh: "基層市民看病負擔增加。" },
             { t: "💼 調高博彩稅", m: 4, h: -4, rm: "馬會及博彩稅收增加。", rh: "對一般市民影響輕微。" },
             { t: "⚡ 減少電費補貼", m: 4, h: -5, rm: "節省政府大筆支出。", rh: "市民電費負擔稍微加重。" },
             { t: "🌉 增加隧道費", m: 3, h: -7, rm: "增加運輸署預算。", rh: "物流與司機成本上升。" },
-            { t: "🏖️ 復收酒店稅", m: 3, h: -6, rm: "增加旅遊相關稅收。", rh: "市民對此沒什麼感覺。" },
+            { t: "🏖️ 復收酒店稅", m: 3, h: -6, rm: "增加旅遊相關稅收。", rh: "加重旅客負擔。" },
             { t: "⚖️ 削減部門開支", m: 4, h: -8, rm: "提升政府行政效率。", rh: "部分公共服務反應變慢。" },
-            { t: "🏗️ 延遲非緊急基建", m: 2, h: -3, rm: "短期內節省大量預算。", rh: "未來便利度可能受阻。" }
+            { t: "🏗️ 延遲非緊急基建", m: 2, h: -3, rm: "短期內節省預算。", rh: "未來便利度可能受阻。" }
         ],
         B: [
             { t: "🌳 加強公園綠化", m: -1, h: 10, rm: "購買花草及維護費。", rh: "社區環境變得更漂亮。" },
@@ -235,7 +231,6 @@
         ]
     };
 
-    // Shuffling function to ensure unique order each game
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -244,7 +239,6 @@
         return array;
     }
 
-    // Initialize Shuffled Decks
     let deckA = shuffle([...policies.A]);
     let deckB = shuffle([...policies.B]);
     let deckC = shuffle([...policies.C]);
@@ -268,22 +262,47 @@
         const deckContainer = document.getElementById('deck');
         deckContainer.innerHTML = '';
         
-        // Take the next unique card from each pre-shuffled deck based on current round
         let roundOptions = [
             { ...deckA[round - 1], color: 'var(--red-card)' },
             { ...deckB[round - 1], color: 'var(--green-card)' },
             { ...deckC[round - 1], color: 'var(--blue-card)' }
         ];
 
-        // Randomize the position (Red/Green/Blue not always in the same spot)
         roundOptions = shuffle(roundOptions);
 
         roundOptions.forEach(p => {
+            // Logic for Emoji Icons on card surface
+            let moneyEmoji = "";
+            if (p.m >= 0) {
+                moneyEmoji = "➕".repeat(Math.min(3, p.m));
+            } else {
+                moneyEmoji = "➖".repeat(Math.min(3, Math.abs(p.m)));
+            }
+
+            let happyEmoji = "";
+            if (p.h >= 0) {
+                happyEmoji = "➕".repeat(Math.min(3, Math.ceil(p.h / 5)));
+            } else {
+                happyEmoji = "➖".repeat(Math.min(3, Math.ceil(Math.abs(p.h) / 3)));
+            }
+
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
                 <div class="card-inner">
-                    <div class="card-front" style="background-color:${p.color}">${p.t}</div>
+                    <div class="card-front" style="background-color:${p.color}; display: flex; flex-direction: column; justify-content: space-between; padding: 15px;">
+                        <div style="font-size: 1.4rem; flex-grow: 1; display: flex; align-items: center; justify-content: center;">${p.t}</div>
+                        <div style="background: rgba(255,255,255,0.85); width: 100%; border-radius: 12px; padding: 8px; font-size: 1rem; text-align: left; border: 1px solid #333;">
+                           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                             <span>💰 收入:</span> 
+                             <span style="letter-spacing: 2px;">${moneyEmoji}</span>
+                           </div>
+                           <div style="display: flex; justify-content: space-between;">
+                             <span>😊 滿意度:</span> 
+                             <span style="letter-spacing: 2px;">${happyEmoji}</span>
+                           </div>
+                        </div>
+                    </div>
                     <div class="card-back">⚖️ 評估中...</div>
                 </div>
             `;
@@ -296,7 +315,6 @@
         if (el.classList.contains('is-flipped')) return;
         el.classList.add('is-flipped');
         
-        // Disable clicking other cards once one is chosen
         const cards = document.querySelectorAll('.card');
         cards.forEach(c => c.style.pointerEvents = 'none');
 
@@ -346,3 +364,7 @@
 
 </body>
 </html>
+
+</body>
+</html>
+
