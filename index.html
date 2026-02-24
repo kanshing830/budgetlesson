@@ -32,7 +32,41 @@
             border-radius: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.15);
             text-align: center;
+            position: relative;
         }
+
+        /* --- Hint Button Style --- */
+        #hint-toggle-container {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 90;
+        }
+
+        .hint-btn {
+            background: #f1c40f;
+            border: 3px solid #333;
+            padding: 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 2px;
+        }
+
+        .hint-btn:hover { background: #f39c12; transform: scale(1.05); }
+        .hint-btn.active { background: #2ecc71; color: white; }
+
+        /* Logic to hide hint boxes */
+        .policy-hint-box { display: none; }
+        .show-hints .policy-hint-box { display: block; }
 
         .dashboard {
             display: grid;
@@ -143,17 +177,21 @@
 </head>
 <body>
 
+<div id="hint-toggle-container">
+    <div id="hint-btn" class="hint-btn" onclick="toggleHints()">💡 顯示提示開關</div>
+</div>
+
 <div id="game-box">
     <h1 style="margin:0; font-size: 2.5rem;">👨‍💼 財政預算大考驗 </h1>
     <p style="font-size: 1.2rem; background: #333; color: #fff; display: inline-block; padding: 5px 20px; border-radius: 10px;">
-        目標：10輪結束後達到 預算平衡 (≥$0) 和 80% 滿意度
+        目標：9輪結束後達到 預算平衡 (≥$0) 和 80% 滿意度
     </p>
     
-    <div style="margin-top:10px; font-weight: bold;">第 <span id="round-text" style="font-size: 1.5rem; color: #e67e22;">1</span> / 10 輪</div>
+    <div style="margin-top:10px; font-weight: bold;">第 <span id="round-text" style="font-size: 1.5rem; color: #e67e22;">1</span> / 9 輪</div>
 
     <div class="dashboard">
         <div class="stat-panel">
-            <div style="font-weight: bold;">💰 財政盈餘/赤字</div>
+            <div style="font-weight: bold;">💰 財政結餘</div>
             <div id="budget-display" class="value">$0</div>
         </div>
         <div class="stat-panel">
@@ -191,6 +229,7 @@
     let budget = 0;
     let satisfaction = 50;
     let round = 1;
+    let showHints = false;
 
     const policies = {
         A: [
@@ -230,6 +269,25 @@
             { t: "🏞️ 優化海濱設施", m: -2, h: 14, rm: "休閒景觀維護開支。", rh: "好評如潮的休閒空間。" }
         ]
     };
+
+    function toggleHints() {
+        showHints = !showHints;
+        updateHintUI();
+    }
+
+    function updateHintUI() {
+        const btn = document.getElementById('hint-btn');
+        const deck = document.getElementById('deck');
+        if(showHints) {
+            btn.classList.add('active');
+            deck.classList.add('show-hints');
+            btn.innerText = "✅ 提示已開啟";
+        } else {
+            btn.classList.remove('active');
+            deck.classList.remove('show-hints');
+            btn.innerText = "💡 顯示提示開關";
+        }
+    }
 
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -271,20 +329,8 @@
         roundOptions = shuffle(roundOptions);
 
         roundOptions.forEach(p => {
-            // Logic for Emoji Icons on card surface
-            let moneyEmoji = "";
-            if (p.m >= 0) {
-                moneyEmoji = "➕".repeat(Math.min(3, p.m));
-            } else {
-                moneyEmoji = "➖".repeat(Math.min(3, Math.abs(p.m)));
-            }
-
-            let happyEmoji = "";
-            if (p.h >= 0) {
-                happyEmoji = "➕".repeat(Math.min(3, Math.ceil(p.h / 5)));
-            } else {
-                happyEmoji = "➖".repeat(Math.min(3, Math.ceil(Math.abs(p.h) / 3)));
-            }
+            let moneyEmoji = p.m >= 0 ? "➕".repeat(Math.min(3, p.m)) : "➖".repeat(Math.min(3, Math.abs(p.m)));
+            let happyEmoji = p.h >= 0 ? "➕".repeat(Math.min(3, Math.ceil(p.h / 5))) : "➖".repeat(Math.min(3, Math.ceil(Math.abs(p.h) / 3)));
 
             const card = document.createElement('div');
             card.className = 'card';
@@ -292,9 +338,9 @@
                 <div class="card-inner">
                     <div class="card-front" style="background-color:${p.color}; display: flex; flex-direction: column; justify-content: space-between; padding: 15px;">
                         <div style="font-size: 1.4rem; flex-grow: 1; display: flex; align-items: center; justify-content: center;">${p.t}</div>
-                        <div style="background: rgba(255,255,255,0.85); width: 100%; border-radius: 12px; padding: 8px; font-size: 1rem; text-align: left; border: 1px solid #333;">
+                        <div class="policy-hint-box" style="background: rgba(255,255,255,0.85); width: 100%; border-radius: 12px; padding: 8px; font-size: 1rem; text-align: left; border: 1px solid #333;">
                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                             <span>💰 收入:</span> 
+                             <span>💰 結餘:</span> 
                              <span style="letter-spacing: 2px;">${moneyEmoji}</span>
                            </div>
                            <div style="display: flex; justify-content: space-between;">
@@ -336,8 +382,13 @@
     function closeModal() {
         document.getElementById('modal-overlay').style.display = 'none';
         round++;
+        
+        // Reset hints to closed for the next round
+        showHints = false;
+        updateHintUI();
+
         updateUI();
-        if (round <= 10) {
+        if (round <= 9) {
             generateCards();
         } else {
             finish();
@@ -349,7 +400,7 @@
         const won = budget >= 0 && satisfaction >= 80;
         screen.style.display = 'flex';
         if (won) {
-            document.getElementById('end-title').innerText = "🏆 你是一個完美的財政司司長！";
+            document.getElementById('end-title').innerText = "🏆 你們是一個完美的財政司司長！";
             document.getElementById('end-body').innerHTML = `最終財政：$${budget}<br>最終滿意度：${satisfaction}%<br>你成功達成了雙重目標！`;
         } else {
             document.getElementById('end-title').innerText = "📉 繼續努力";
@@ -364,7 +415,3 @@
 
 </body>
 </html>
-
-</body>
-</html>
-
