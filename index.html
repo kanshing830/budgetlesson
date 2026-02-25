@@ -35,38 +35,7 @@
             position: relative;
         }
 
-        /* --- Hint Button Style --- */
-        #hint-toggle-container {
-            position: fixed;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 90;
-        }
-
-        .hint-btn {
-            background: #f1c40f;
-            border: 3px solid #333;
-            padding: 15px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: all 0.3s;
-            writing-mode: vertical-rl;
-            text-orientation: upright;
-            letter-spacing: 2px;
-        }
-
-        .hint-btn:hover { background: #f39c12; transform: scale(1.05); }
-        .hint-btn.active { background: #2ecc71; color: white; }
-
-        /* Logic to hide hint boxes */
-        .policy-hint-box { display: none; }
-        .show-hints .policy-hint-box { display: block; }
+        /* Removed Hint Button Styles */
 
         .dashboard {
             display: grid;
@@ -148,6 +117,18 @@
             color: #2d3436; 
         }
 
+        /* Hints are now always visible */
+        .policy-hint-box { 
+            display: block; 
+            background: rgba(255,255,255,0.85); 
+            width: 100%; 
+            border-radius: 12px; 
+            padding: 8px; 
+            font-size: 1rem; 
+            text-align: left; 
+            border: 1px solid #333;
+        }
+
         .card-back { 
             background: #f9f9f9; 
             transform: rotateY(180deg); 
@@ -176,10 +157,6 @@
     </style>
 </head>
 <body>
-
-<div id="hint-toggle-container">
-    <div id="hint-btn" class="hint-btn" onclick="toggleHints()">💡 顯示提示開關</div>
-</div>
 
 <div id="game-box">
     <h1 style="margin:0; font-size: 2.5rem;">👨‍💼 財政預算大考驗 </h1>
@@ -229,7 +206,6 @@
     let budget = 0;
     let satisfaction = 50;
     let round = 1;
-    let showHints = false;
 
     const policies = {
         A: [
@@ -269,25 +245,6 @@
             { t: "🏞️ 優化海濱設施", m: -2, h: 14, rm: "休閒景觀維護開支。", rh: "好評如潮的休閒空間。" }
         ]
     };
-
-    function toggleHints() {
-        showHints = !showHints;
-        updateHintUI();
-    }
-
-    function updateHintUI() {
-        const btn = document.getElementById('hint-btn');
-        const deck = document.getElementById('deck');
-        if(showHints) {
-            btn.classList.add('active');
-            deck.classList.add('show-hints');
-            btn.innerText = "✅ 提示已開啟";
-        } else {
-            btn.classList.remove('active');
-            deck.classList.remove('show-hints');
-            btn.innerText = "💡 顯示提示開關";
-        }
-    }
 
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -338,7 +295,7 @@
                 <div class="card-inner">
                     <div class="card-front" style="background-color:${p.color}; display: flex; flex-direction: column; justify-content: space-between; padding: 15px;">
                         <div style="font-size: 1.4rem; flex-grow: 1; display: flex; align-items: center; justify-content: center;">${p.t}</div>
-                        <div class="policy-hint-box" style="background: rgba(255,255,255,0.85); width: 100%; border-radius: 12px; padding: 8px; font-size: 1rem; text-align: left; border: 1px solid #333;">
+                        <div class="policy-hint-box">
                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                              <span>💰 結餘:</span> 
                              <span style="letter-spacing: 2px;">${moneyEmoji}</span>
@@ -383,10 +340,6 @@
         document.getElementById('modal-overlay').style.display = 'none';
         round++;
         
-        // Reset hints to closed for the next round
-        showHints = false;
-        updateHintUI();
-
         updateUI();
         if (round <= 9) {
             generateCards();
